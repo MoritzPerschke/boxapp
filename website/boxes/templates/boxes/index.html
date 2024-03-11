@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>My Website</title>
-    <!-- <link rel="stylesheet" href="./style.css"> -->
+    <link rel="stylesheet" href="{{ STATIC_URL }}style.css">
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
   </head>
   <body>
@@ -17,8 +17,19 @@
 	      <div class="boxHeading"> <h2> {{box.name }} </h2> </div>
 	      <img src="{{ box.image.url }}" class="boxImage"/>
 	      <div class="description">
-		<p> Gewicht: {{ box.weight }}g </p>
-		<p> Druckzeit: {{ box.print_time }}h </p>
+		<p> Gewicht: <span class="boxWeight">{{ box.weight }}g </span> </p>
+		<p> Druckzeit: <span class="boxPrintTime">{{ box.print_time }}h </span></p>
+	      </div>
+	      <div class="selection">
+		<select class="filament-dropdown">
+		  {% for filament in filaments %}
+		    <option value="{{filament.id}}" data-price-per-kg="{{ filament.price_per_kg}}">{{filament.name}}</option>
+		  {% endfor %}
+		</select>
+		<button class="add-to-list">Add</button>
+	      </div>
+	      <div class="calculated-price-preview"
+		<p> (Druckzeit * 50ct) + (Gewicht * (preis pro g)€</p>
 	      </div>
 	    </div>
 	{% endfor %}
@@ -34,17 +45,6 @@
 	      <div class="boxHeading"><h2> {{filament.name}} </h2></div>
 	      <img src="{{filament.image.url}}" class="filamentImage"/>
 	      <div class="description">
-		<div class="stats">
-		  <p> Preis pro kg: {{ filament.price_per_kg }} Euro </p>
-		</div>
-		<div class="examples">
-		  <p> price per box: </p>
-		  <ul>
-		    {% for box in boxes %}
-		      <p> {{box.name}}: {{ (filament.price_per_kg * box.weight)}} </p>
-		    {% endfor %}
-		  </ul>
-		</div>
 	      </div>
 	    </div>
 	  {% endfor %}
@@ -52,10 +52,69 @@
       {% else %}
 	      <p> No Filaments here </p>
       {% endif %}
+
+      <div class="json-list" id="json-list"/>
     </main>
 	<!-- <script src="index.js"></script> -->
   </body>
 </html>
+
+<script>
+  // JavaScript to handle adding box and filament combinations to JSON list
+  var jsonList = [];
+
+  // Event listener for "Add to List" button
+  document.querySelectorAll('.add-to-list').forEach(button => {
+    button.addEventListener('click', function() {
+      var boxName = this.closest('.boxItem').querySelector('.boxHeading h2').textContent.trim();
+      var filamentName = this.previousElementSibling.options[this.previousElementSibling.selectedIndex].text;
+      var filamentPricePerKg = parseFloat(this.closest('.boxItem').querySelector('.filament-dropdown').querySelector('option:checked').getAttribute('data-price-per-kg'));
+      var boxPrintTime = parseFloat(this.closest('.boxItem').querySelector('.boxPrintTime').textContent.trim());
+      var boxWeight = parseFloat(this.closest('.boxItem').querySelector('.boxWeight').textContent.trim());
+      var totalWeight = boxWeight / 1000; // Convert grams to kilograms
+      var totalPrice = ((boxPrintTime * 0.5) + (totalWeight * filamentPricePerKg)).toFixed(2);
+      var boxFilament = { box_name: boxName, filament_name: filamentName, price: totalPrice };
+      jsonList.push(boxFilament);
+
+      renderJsonList();
+    });
+  });
+
+  // Function to render JSON list
+  function renderJsonList() {
+    var jsonListElement = document.getElementById('json-list');
+    jsonListElement.innerHTML = '<h2>Selected Combinations:</h2>';
+    jsonList.forEach(item => {
+      jsonListElement.innerHTML += '<p>Box: ' + item.box_name + ', Filament: ' + item.filament_name + ', Price: €' + item.price + '</p>';
+    });
+  }
+
+  // Update price preview when filament is selected
+  document.querySelectorAll('.filament-dropdown').forEach(select => {
+    select.addEventListener('change', function() {
+      var pricePerKg = parseFloat(this.querySelector('option:checked').getAttribute('data-price-per-kg'));
+      var boxPrintTime = parseFloat(this.closest('.boxItem').querySelector('.boxPrintTime').textContent.trim());
+      var boxWeight = parseFloat(this.closest('.boxItem').querySelector('.boxWeight').textContent.trim());
+      var totalWeight = boxWeight / 1000; // Convert grams to kilograms
+      var totalPrice = (boxPrintTime + (totalWeight * pricePerKg)).toFixed(2);
+      var pricePreview = this.closest('.boxItem').querySelector('.calculated-price-preview');
+      pricePreview.textContent = 'Preis: ' + totalPrice + '€';
+      pricePreview.dataset.price = totalPrice; // Store the price in dataset for later retrieval
+    });
+  });
+
+  // Send JSON list to email
+  function sendEmail() {
+    // Retrieve prices from the dataset
+    jsonList.forEach(item => {
+      item.price = parseFloat(document.querySelector('.calculated-price-preview[data-box-name="' + item.box_name + '"]').dataset.price).toFixed(2);
+    });
+
+    // Implement your email sending logic here with jsonList
+    console.log('Sending JSON list to email:', jsonList);
+  }
+</script>
+
 
 <style>
 h2{
@@ -63,7 +122,7 @@ h2{
 }
 .content {
   display: grid;
-  grid-template-columns: 40% 40% 20%;
+  grid-template-columns: 40% 30% 30%;
 }
 .boxList {
   grid-column: 1/2;
@@ -71,7 +130,7 @@ h2{
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
 }
 .filamentList {
   grid-column: 2/3;
@@ -84,18 +143,18 @@ h2{
 .boxItem {
   border: 1px solid black;
   margin: 10px;
-  width: 100%;
+  width: 80%;
   height: 500px;
   padding: 20px;
   display: grid;
   grid-template-rows: 10% 60% 30%;
-  grid-template-columns: 10% 80% 10%;
+  grid-template-columns: 15% 65% 20%;
 }
 .filamentItem {
   border: 1px solid black;
-  margin: 10px;
-  width: 100%;
-  height: 500px;
+  margin: 40px;
+  width: 75%;
+  height: 200px;
   padding: 20px;
   display: grid;
   grid-template-rows: 10% 60% 30%;
@@ -109,7 +168,7 @@ h2{
   align-content: center;
 }
 .boxImage{
-  grid-column: 2/3;
+  grid-column: 1/4;
   grid-row: 2/3;
   height: 100%;
   justify-self: center;
@@ -125,15 +184,32 @@ h2{
   z-index: -1;
 }
 .description {
-  grid-column: 1/3;
-  grid-row: 3/4;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-}
-.stats {
   grid-column: 1/2;
+  grid-row: 3/4;
 }
-.examples {
+.selection {
   grid-column: 2/3;
+  grid-row: 3/4;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+.filament-dropdown {
+  width: 200px;
+  height: 30px;
+}
+.calculated-price-preview{
+  grid-column: 3/4;
+  grid-row: 3/4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.add-to-list {
+  width: 50px;
+  height: 30px;
+}
+.json-list{
+  grid-column: 3/4;
 }
 </style>

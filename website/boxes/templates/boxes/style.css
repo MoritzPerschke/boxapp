@@ -1,9 +1,95 @@
-main {
-  border: 2px solid red;
-  display: grid;
-  rows: repeat(4, 1fr);
-  columns: repeat(4, 1fr);
+h2{
+  margin: 0;
 }
-.boxitem {
-
+.content {
+  display: grid;
+  grid-template-columns: 40% 30% 30%;
+}
+.boxList {
+  grid-column: 1/2;
+  /* border: 2px solid red; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* flex-wrap: wrap; */
+}
+.filamentList {
+  grid-column: 2/3;
+  /* border: 2px solid red; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.boxItem {
+  border: 1px solid black;
+  margin: 10px;
+  width: 80%;
+  height: 500px;
+  padding: 20px;
+  display: grid;
+  grid-template-rows: 10% 60% 30%;
+  grid-template-columns: 15% 65% 20%;
+}
+.filamentItem {
+  border: 1px solid black;
+  margin: 40px;
+  width: 75%;
+  height: 200px;
+  padding: 20px;
+  display: grid;
+  grid-template-rows: 10% 60% 30%;
+  grid-template-columns: 10% 80% 10%;
+}
+.boxHeading{
+  grid-column: 2/3;
+  grid-row: 1/2;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+.boxImage{
+  grid-column: 1/4;
+  grid-row: 2/3;
+  height: 100%;
+  justify-self: center;
+  align-self: center;
+  z-index: -1;
+}
+.filamentImage {
+  grid-column: 2/3;
+  grid-row: 2/3;
+  height: 100%;
+  justify-self: center;
+  align-self: center;
+  z-index: -1;
+}
+.description {
+  grid-column: 1/2;
+  grid-row: 3/4;
+}
+.selection {
+  grid-column: 2/3;
+  grid-row: 3/4;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+}
+.filament-dropdown {
+  width: 200px;
+  height: 30px;
+}
+.calculated-price-preview{
+  grid-column: 3/4;
+  grid-row: 3/4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.add-to-list {
+  width: 50px;
+  height: 30px;
+}
+.json-list{
+  grid-column: 3/4;
 }
