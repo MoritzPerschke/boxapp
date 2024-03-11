@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>My Website</title>
-    <link rel="stylesheet" href="./style.css">
+    <!-- <link rel="stylesheet" href="./style.css"> -->
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
   </head>
   <body>
-    <main>
+    <main class="content">
       {% if boxes %}
-	<ul>
+	<ul class="boxList">
 	  {% for box in boxes %}
-	  <li> 
-	    {{box.name }}
-	    <img src="{{ box.image.url }}"/>
-	</li>
+	    <div class="boxItem">
+	      <div class="boxHeading"> <h2> {{box.name }} </h2> </div>
+	      <img src="{{ box.image.url }}" class="boxImage"/>
+	    </div>
 	{% endfor %}
 	</ul>
       {% else %}
@@ -27,3 +27,44 @@
   </body>
 </html>
 
+<style>
+h2{
+  margin: 0;
+}
+.content {
+  display: grid;
+  grid-template-columns: 80% 20%;
+}
+.boxList {
+  grid-column: 1/2;
+  border: 2px solid red;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.boxItem {
+  border: 2px solid green;
+  width: 400px;
+  height: 500px;
+  padding: 20px;
+  display: grid;
+  grid-template-rows: 10% 60% 30%;
+  grid-template-columns: 10% 80% 10%;
+}
+.boxHeading{
+  grid-column: 2/3;
+  grid-row: 1/2;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+}
+.boxImage{
+  grid-column: 2/3;
+  grid-row: 2/3;
+  height: 100%;
+  justify-self: center;
+  align-self: center;
+  z-index: -1;
+}
+</style>
