@@ -7,8 +7,22 @@
     <title>My Website</title>
     <link rel="stylesheet" href="{{ STATIC_URL }}style.css">
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <script type="module" src="https://md-block.verou.me/md-block.js"></script>
   </head>
   <body>
+    <md-block>
+      # MTG-related stuff zum drucken
+      einfach bei der box eines der filaments auswählen und auf 'add' clicken, wird automatisch zur liste (rechts) hinzugefügt
+
+      Hier sind jetzt nur die boxen gelistet wo ich mir gedacht hab mit denen kann man was anfangen, sonst gibts auch noch [printables.com](https://www.printables.com/) zum selber suchen.
+
+      Ich hab auch eine [collection](https://www.printables.com/@Gingerbreadme_269852/collections/1308757) angfangen, falls ihr da was raus haben wollts lassts mich wissen dann tu ichs hier dazu.
+      - Preis berechnet mit (Druckzeit * 1€) + (Gewicht * preis pro g)€
+      - sonderwünsche (+ 1€):
+	- unterschiedliche farbkombination (box/deckel) geht logischerweise auch, einfach dann auf WhatsApp oder so bescheid geben
+	- farbe auf halber höhe der box ändern geht auch
+	- sonst einfach melden
+    </md-block>
     <main class="content">
       {% if boxes %}
 	<ul class="boxList">
@@ -29,7 +43,7 @@
 		<button class="add-to-list">Add</button>
 	      </div>
 	      <div class="calculated-price-preview"
-		<p> (Druckzeit * 50ct) + (Gewicht * (preis pro g)€</p>
+		<p> (Druckzeit * 1€) + (Gewicht * (preis pro g)€</p>
 	      </div>
 	    </div>
 	{% endfor %}
@@ -43,7 +57,7 @@
 	  {% for filament in filaments %}
 	    <div class="filamentItem">
 	      <div class="boxHeading"><h2> {{filament.name}} </h2></div>
-	      <img src="{{filament.image.url}}" class="filamentImage"/>
+	      <img class="filamentImage" src="{{filament.image.url}}" class="filamentImage"/>
 	      <div class="description">
 	      </div>
 	    </div>
@@ -52,8 +66,14 @@
       {% else %}
 	      <p> No Filaments here </p>
       {% endif %}
+	<div class="summary">
+	    <p>Dateiname:</p>
+            <input type="text" id="list-name" placeholder="Enter your name">
+            <p>Gesamtpreis: <span id="total-price">€0.00</span></p>
+            <button id="download-btn">Download as TXT</button>
+        <div class="json-list" id="json-list"></div>
+        </div>
 
-      <div class="json-list" id="json-list"/>
     </main>
 	<!-- <script src="index.js"></script> -->
   </body>
@@ -67,16 +87,22 @@
   document.querySelectorAll('.add-to-list').forEach(button => {
     button.addEventListener('click', function() {
       var boxName = this.closest('.boxItem').querySelector('.boxHeading h2').textContent.trim();
+      var filamentId = this.previousElementSibling.value;
       var filamentName = this.previousElementSibling.options[this.previousElementSibling.selectedIndex].text;
       var filamentPricePerKg = parseFloat(this.closest('.boxItem').querySelector('.filament-dropdown').querySelector('option:checked').getAttribute('data-price-per-kg'));
       var boxPrintTime = parseFloat(this.closest('.boxItem').querySelector('.boxPrintTime').textContent.trim());
       var boxWeight = parseFloat(this.closest('.boxItem').querySelector('.boxWeight').textContent.trim());
       var totalWeight = boxWeight / 1000; // Convert grams to kilograms
-      var totalPrice = ((boxPrintTime * 0.5) + (totalWeight * filamentPricePerKg)).toFixed(2);
+      var totalPrice = (boxPrintTime + (totalWeight * filamentPricePerKg)).toFixed(2);
+      var pricePreview = this.closest('.boxItem').querySelector('.calculated-price-preview');
+      pricePreview.textContent = 'Price: €' + totalPrice;
+      pricePreview.dataset.price = totalPrice; // Store the price in dataset for later retrieval
+
       var boxFilament = { box_name: boxName, filament_name: filamentName, price: totalPrice };
       jsonList.push(boxFilament);
-
       renderJsonList();
+
+      updateTotalPrice();
     });
   });
 
@@ -89,30 +115,39 @@
     });
   }
 
-  // Update price preview when filament is selected
-  document.querySelectorAll('.filament-dropdown').forEach(select => {
-    select.addEventListener('change', function() {
-      var pricePerKg = parseFloat(this.querySelector('option:checked').getAttribute('data-price-per-kg'));
-      var boxPrintTime = parseFloat(this.closest('.boxItem').querySelector('.boxPrintTime').textContent.trim());
-      var boxWeight = parseFloat(this.closest('.boxItem').querySelector('.boxWeight').textContent.trim());
-      var totalWeight = boxWeight / 1000; // Convert grams to kilograms
-      var totalPrice = (boxPrintTime + (totalWeight * pricePerKg)).toFixed(2);
-      var pricePreview = this.closest('.boxItem').querySelector('.calculated-price-preview');
-      pricePreview.textContent = 'Preis: ' + totalPrice + '€';
-      pricePreview.dataset.price = totalPrice; // Store the price in dataset for later retrieval
-    });
-  });
-
-  // Send JSON list to email
-  function sendEmail() {
-    // Retrieve prices from the dataset
+  // Function to update total price
+  function updateTotalPrice() {
+    var totalPrice = 0;
     jsonList.forEach(item => {
-      item.price = parseFloat(document.querySelector('.calculated-price-preview[data-box-name="' + item.box_name + '"]').dataset.price).toFixed(2);
+      totalPrice += parseFloat(item.price);
     });
-
-    // Implement your email sending logic here with jsonList
-    console.log('Sending JSON list to email:', jsonList);
+    document.getElementById('total-price').textContent = '€' + totalPrice.toFixed(2);
   }
+
+  // Download JSON list as a text file
+  document.getElementById('download-btn').addEventListener('click', function() {
+    // var textToSave = JSON.stringify(jsonList, null, 2);
+    var listname = document.getElementById('list-name').value;
+    // var blob = new Blob([textToSave], { type: 'text/plain' });
+    // var url = window.URL.createObjectURL(blob);
+    // var a = document.createElement('a');
+    var listContent = '';
+
+    jsonList.forEach(item => {
+      listContent += 'Box: ' + item.box_name + 'Filament: ' + item.filament_name + 'Preis: ' + item.price + '\n';
+    });
+    listContent += 'Gesamt: ' + document.getElementById('total-price').textContent;
+    console.log(listContent)
+
+    var blob = new Blob([listContent], { type: 'text/plain' });
+    var url = window.URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = listname + '.txt';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+  });
 </script>
 
 
@@ -157,7 +192,7 @@ h2{
   height: 200px;
   padding: 20px;
   display: grid;
-  grid-template-rows: 10% 60% 30%;
+  grid-template-rows: 30% 70%;
   grid-template-columns: 10% 80% 10%;
 }
 .boxHeading{
@@ -180,7 +215,7 @@ h2{
   grid-row: 2/3;
   height: 100%;
   justify-self: center;
-  align-self: center;
+  align-self: bottom;
   z-index: -1;
 }
 .description {
