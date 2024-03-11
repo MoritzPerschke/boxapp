@@ -18,3 +18,7 @@ class Filament(models.Model):
 
     def __str__(self):
         return self.name
+
+class Order(models.Model):
+    items = models.CharField(max_length = 5000)
+    total = models.FloatField()

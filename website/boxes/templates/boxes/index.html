@@ -16,11 +16,41 @@
 	    <div class="boxItem">
 	      <div class="boxHeading"> <h2> {{box.name }} </h2> </div>
 	      <img src="{{ box.image.url }}" class="boxImage"/>
+	      <div class="description">
+		<p> Gewicht: {{ box.weight }}g </p>
+		<p> Druckzeit: {{ box.print_time }}h </p>
+	      </div>
 	    </div>
 	{% endfor %}
 	</ul>
       {% else %}
 	      <p> No Boxes here </p>
+      {% endif %}
+
+      {% if filaments %}
+        <ul class="filamentList">
+	  {% for filament in filaments %}
+	    <div class="filamentItem">
+	      <div class="boxHeading"><h2> {{filament.name}} </h2></div>
+	      <img src="{{filament.image.url}}" class="filamentImage"/>
+	      <div class="description">
+		<div class="stats">
+		  <p> Preis pro kg: {{ filament.price_per_kg }} Euro </p>
+		</div>
+		<div class="examples">
+		  <p> price per box: </p>
+		  <ul>
+		    {% for box in boxes %}
+		      <p> {{box.name}}: {{ (filament.price_per_kg * box.weight)}} </p>
+		    {% endfor %}
+		  </ul>
+		</div>
+	      </div>
+	    </div>
+	  {% endfor %}
+	</ul>
+      {% else %}
+	      <p> No Filaments here </p>
       {% endif %}
     </main>
 	<!-- <script src="index.js"></script> -->
@@ -33,19 +63,38 @@ h2{
 }
 .content {
   display: grid;
-  grid-template-columns: 80% 20%;
+  grid-template-columns: 40% 40% 20%;
 }
 .boxList {
   grid-column: 1/2;
-  border: 2px solid red;
+  /* border: 2px solid red; */
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.filamentList {
+  grid-column: 2/3;
+  /* border: 2px solid red; */
+  display: flex;
+  flex-direction: column;
   align-items: center;
   flex-wrap: wrap;
 }
 .boxItem {
-  border: 2px solid green;
-  width: 400px;
+  border: 1px solid black;
+  margin: 10px;
+  width: 100%;
+  height: 500px;
+  padding: 20px;
+  display: grid;
+  grid-template-rows: 10% 60% 30%;
+  grid-template-columns: 10% 80% 10%;
+}
+.filamentItem {
+  border: 1px solid black;
+  margin: 10px;
+  width: 100%;
   height: 500px;
   padding: 20px;
   display: grid;
@@ -66,5 +115,25 @@ h2{
   justify-self: center;
   align-self: center;
   z-index: -1;
+}
+.filamentImage {
+  grid-column: 2/3;
+  grid-row: 2/3;
+  height: 100%;
+  justify-self: center;
+  align-self: center;
+  z-index: -1;
+}
+.description {
+  grid-column: 1/3;
+  grid-row: 3/4;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.stats {
+  grid-column: 1/2;
+}
+.examples {
+  grid-column: 2/3;
 }
 </style>
