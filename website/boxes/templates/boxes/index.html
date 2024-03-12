@@ -17,7 +17,7 @@
       Hier sind jetzt nur die boxen gelistet wo ich mir gedacht hab mit denen kann man was anfangen, sonst gibts auch noch [printables.com](https://www.printables.com/) zum selber suchen.
 
       Ich hab auch eine [collection](https://www.printables.com/@Gingerbreadme_269852/collections/1308757) angfangen, falls ihr da was raus haben wollts lassts mich wissen dann tu ichs hier dazu.
-      - Preis berechnet mit (Druckzeit * 1€) + (Gewicht * preis pro g)€
+      - Preis berechnet mit (Druckzeit * 1€) + (Gewicht * (preis pro g * 1.2))€
       - sonderwünsche (+ 1€):
 	- unterschiedliche farbkombination (box/deckel) geht logischerweise auch, einfach dann auf WhatsApp oder so bescheid geben
 	- farbe auf halber höhe der box ändern geht auch
@@ -43,7 +43,7 @@
 		<button class="add-to-list">Add</button>
 	      </div>
 	      <div class="calculated-price-preview"
-		<p> (Druckzeit * 1€) + (Gewicht * (preis pro g)€</p>
+		<p> (Druckzeit * 1€) + (Gewicht * (preis pro g * 1.2)€</p>
 	      </div>
 	    </div>
 	{% endfor %}
@@ -93,7 +93,7 @@
       var boxPrintTime = parseFloat(this.closest('.boxItem').querySelector('.boxPrintTime').textContent.trim());
       var boxWeight = parseFloat(this.closest('.boxItem').querySelector('.boxWeight').textContent.trim());
       var totalWeight = boxWeight / 1000; // Convert grams to kilograms
-      var totalPrice = (boxPrintTime + (totalWeight * filamentPricePerKg)).toFixed(2);
+      var totalPrice = (boxPrintTime + (totalWeight * (filamentPricePerKg * 1.2))).toFixed(2);
       var pricePreview = this.closest('.boxItem').querySelector('.calculated-price-preview');
       pricePreview.textContent = 'Price: €' + totalPrice;
       pricePreview.dataset.price = totalPrice; // Store the price in dataset for later retrieval
@@ -126,11 +126,7 @@
 
   // Download JSON list as a text file
   document.getElementById('download-btn').addEventListener('click', function() {
-    // var textToSave = JSON.stringify(jsonList, null, 2);
     var listname = document.getElementById('list-name').value;
-    // var blob = new Blob([textToSave], { type: 'text/plain' });
-    // var url = window.URL.createObjectURL(blob);
-    // var a = document.createElement('a');
     var listContent = '';
 
     jsonList.forEach(item => {
