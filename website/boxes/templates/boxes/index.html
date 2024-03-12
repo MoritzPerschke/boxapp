@@ -17,7 +17,7 @@
       Hier sind jetzt nur die boxen gelistet wo ich mir gedacht hab mit denen kann man was anfangen, sonst gibts auch noch [printables.com](https://www.printables.com/) zum selber suchen.
 
       Ich hab auch eine [collection](https://www.printables.com/@Gingerbreadme_269852/collections/1308757) angfangen, falls ihr da was raus haben wollts lassts mich wissen dann tu ichs hier dazu.
-      - Preis berechnet mit (Druckzeit * 1€) + (Gewicht * (preis pro g * 1.2))€
+      - Preis berechnet mit (Druckzeit * 1€) + (Gewicht * (preis pro g * 1.1))€
       - sonderwünsche (+ 1€):
 	- unterschiedliche farbkombination (box/deckel) geht logischerweise auch, einfach dann auf WhatsApp oder so bescheid geben
 	- farbe auf halber höhe der box ändern geht auch
@@ -43,7 +43,7 @@
 		<button class="add-to-list">Add</button>
 	      </div>
 	      <div class="calculated-price-preview"
-		<p> (Druckzeit * 1€) + (Gewicht * (preis pro g * 1.2)€</p>
+		<p> (Druckzeit * 1€) + (Gewicht * (preis pro g * 1.1)€</p>
 	      </div>
 	    </div>
 	{% endfor %}
@@ -83,17 +83,22 @@
   // JavaScript to handle adding box and filament combinations to JSON list
   var jsonList = [];
 
+  function calculatePrice(filamentPricePerKg, boxWeight, boxPrintTime){
+      var totalWeight = boxWeight / 1000; // Convert grams to kilograms
+      var totalPrice = (boxPrintTime + (totalWeight * (filamentPricePerKg * 1.1))).toFixed(2);
+      return totalPrice;
+  }
   // Event listener for "Add to List" button
   document.querySelectorAll('.add-to-list').forEach(button => {
     button.addEventListener('click', function() {
       var boxName = this.closest('.boxItem').querySelector('.boxHeading h2').textContent.trim();
       var filamentId = this.previousElementSibling.value;
       var filamentName = this.previousElementSibling.options[this.previousElementSibling.selectedIndex].text;
+
       var filamentPricePerKg = parseFloat(this.closest('.boxItem').querySelector('.filament-dropdown').querySelector('option:checked').getAttribute('data-price-per-kg'));
       var boxPrintTime = parseFloat(this.closest('.boxItem').querySelector('.boxPrintTime').textContent.trim());
       var boxWeight = parseFloat(this.closest('.boxItem').querySelector('.boxWeight').textContent.trim());
-      var totalWeight = boxWeight / 1000; // Convert grams to kilograms
-      var totalPrice = (boxPrintTime + (totalWeight * (filamentPricePerKg * 1.2))).toFixed(2);
+      var totalPrice = calculatePrice(filamentPricePerKg, boxWeight, boxPrintTime);
       var pricePreview = this.closest('.boxItem').querySelector('.calculated-price-preview');
       pricePreview.textContent = 'Price: €' + totalPrice;
       pricePreview.dataset.price = totalPrice; // Store the price in dataset for later retrieval
@@ -103,6 +108,20 @@
       renderJsonList();
 
       updateTotalPrice();
+    });
+  });
+
+  // Update price preview when filament is selected
+  document.querySelectorAll('.filament-dropdown').forEach(select => {
+    select.addEventListener('change', function() {
+      var pricePreview = this.closest('.boxItem').querySelector('.calculated-price-preview');
+      var filamentPricePerKg = parseFloat(this.closest('.boxItem').querySelector('.filament-dropdown').querySelector('option:checked').getAttribute('data-price-per-kg'));
+      var boxPrintTime = parseFloat(this.closest('.boxItem').querySelector('.boxPrintTime').textContent.trim());
+      var boxWeight = parseFloat(this.closest('.boxItem').querySelector('.boxWeight').textContent.trim());
+      var price = calculatePrice(filamentPricePerKg, boxWeight, boxPrintTime);
+      console.log(price)
+      pricePreview.textContent = 'Price: €' + price;
+      pricePreview.dataset.price = price; // Store the price in dataset for later retrieval
     });
   });
 
