@@ -17,18 +17,21 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'images')
-# MEDIA_URL = '/'
+
+# Path for static files
+STATIC_URL = 'static/'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-gj+rbn_n(0ub&l)d(57y6ala^2e1j6m1xgl295*%4vg1fltal1'
+# SECRET_KEY = 'django-insecure-gj+rbn_n(0ub&l)d(57y6ala^2e1j6m1xgl295*%4vg1fltal1'
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
